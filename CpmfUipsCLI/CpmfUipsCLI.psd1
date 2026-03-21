@@ -9,7 +9,7 @@
     PowerShellVersion = '7.0'
 
     RequiredModules   = @(
-        @{ ModuleName = 'CpmfUipsPack'; ModuleVersion = '0.1.1' }
+        @{ ModuleName = 'CpmfUipsPack'; ModuleVersion = '0.1.0'; MaximumVersion = '0.1.9999' }
     )
 
     FunctionsToExport = @(
