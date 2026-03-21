@@ -1,6 +1,6 @@
 # CpmfUipsCLI
 
-A thin PowerShell 7 CLI wrapper around [CpmfUipsPack](https://github.com/rpapub/cpmf-uips-pwshpack). Provides a single `Invoke-CpmfUipsCLI` entry point that dispatches to all `CpmfUipsPack` public functions, with tab-completable subcommands and `UIPS_*` environment variable injection.
+A thin PowerShell 7 CLI wrapper. Initially wraps [CpmfUipsPack](https://github.com/rpapub/cpmf-uips-pwshpack), providing a single `Invoke-CpmfUipsCLI` entry point with tab-completable subcommands and `UIPS_*` environment variable injection.
 
 > **Trademark notice:** UiPath and UiPath Studio are trademarks of UiPath Inc.
 > This module is not affiliated with or endorsed by UiPath Inc.
