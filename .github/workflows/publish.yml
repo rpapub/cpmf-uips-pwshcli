@@ -46,6 +46,12 @@ jobs:
           }
           Write-Host "Manifest version $($m.Version) matches tag $tag"
 
+      - name: Add module to PSModulePath
+        shell: pwsh
+        run: |
+          $env:PSModulePath = "$pwd;$env:PSModulePath"
+          Add-Content $env:GITHUB_ENV "PSModulePath=$env:PSModulePath"
+
       - name: Run Pester
         shell: pwsh
         run: |
