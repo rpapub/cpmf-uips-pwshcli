@@ -2,20 +2,9 @@
 #Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.0' }
 
 BeforeAll {
-    $modulePath = Resolve-Path "$PSScriptRoot/../../CpmfUipsCLI/CpmfUipsCLI.psd1"
-
-    # Import CpmfUipsPack from the sibling repo (dev path) if not already available.
-    if (-not (Get-Module CpmfUipsPack)) {
-        $packPath = Resolve-Path "$PSScriptRoot/../../../cpmf-uips-pwshpack/CpmfUipsPack/CpmfUipsPack.psd1" `
-                    -ErrorAction SilentlyContinue
-        if (-not $packPath) {
-            # Fallback: installed copy
-            $packPath = "$HOME/Documents/PowerShell/Modules/CpmfUipsPack/CpmfUipsPack.psd1"
-        }
-        Import-Module $packPath -Force -ErrorAction Stop
-    }
-
-    Import-Module $modulePath -Force -ErrorAction Stop
+    # Tests run against the installed copy (placed by scripts/Test-LocalInstall.ps1).
+    # CpmfUipsPack is pulled in automatically via RequiredModules.
+    Import-Module CpmfUipsCLI -Force -ErrorAction Stop
 }
 
 Describe 'Invoke-CpmfUipsCLI — dispatch' {
