@@ -128,9 +128,6 @@ function Invoke-CpmfUipsCLI {
     $forwardParams.Remove('Command') | Out-Null
 
     # Also remove CLI-only params not accepted by specific subcommands.
-    $packOnly     = @('ProjectJson', 'FeedPath', 'Targets', 'NoBump', 'UseWorktree',
-                      'SkipInstall', 'MultiTfm', 'ConfigFile', 'CliVersion',
-                      'CliVersionNet6', 'CliVersionNet8', 'ToolBase')
     $toolOnly     = @('CliVersionNet6', 'CliVersionNet8', 'ToolBase')
     $configOnly   = @('Force')
 
