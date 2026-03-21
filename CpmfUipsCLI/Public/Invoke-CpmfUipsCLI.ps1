@@ -136,7 +136,13 @@ function Invoke-CpmfUipsCLI {
             $remove = @('Force')
             foreach ($k in $remove) { $forwardParams.Remove($k) | Out-Null }
             Write-Verbose "[CpmfUipsCLI] → Invoke-CpmfUipsPack"
-            Write-Output (Invoke-CpmfUipsPack @forwardParams)
+            $projectName = if ($ProjectJson) { Split-Path (Split-Path $ProjectJson -Parent) -Leaf } else { '(unknown)' }
+            Write-Host "[pack] Packing $projectName …"
+            $packResults = @(Invoke-CpmfUipsPack @forwardParams)
+            foreach ($path in $packResults) {
+                Write-Host "[pack] Staged: $(Split-Path $path -Leaf)"
+            }
+            Write-Output $packResults
         }
 
         'install-tool' {

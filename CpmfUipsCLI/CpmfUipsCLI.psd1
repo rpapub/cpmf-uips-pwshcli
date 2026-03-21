@@ -1,6 +1,6 @@
 @{
     RootModule        = 'CpmfUipsCLI.psm1'
-    ModuleVersion     = '0.1.0'
+    ModuleVersion     = '0.1.1'
     GUID              = '4c877d80-6d0c-403e-b0f2-02120b868ef8'
     Author            = 'Christian Prior-Mamulyan'
     CompanyName       = 'cprima'
@@ -9,7 +9,7 @@
     PowerShellVersion = '7.0'
 
     RequiredModules   = @(
-        @{ ModuleName = 'CpmfUipsPack'; ModuleVersion = '0.1.0' }
+        @{ ModuleName = 'CpmfUipsPack'; ModuleVersion = '0.1.1' }
     )
 
     FunctionsToExport = @(
@@ -24,7 +24,7 @@
             Tags        = @('UiPath', 'RPA', 'NuGet', 'CI', 'pack', 'cli', 'cpmf-uips')
             LicenseUri  = 'https://github.com/rpapub/cpmf-uips-pwshcli/blob/main/LICENSE'
             ProjectUri  = 'https://github.com/rpapub/cpmf-uips-pwshcli'
-            ReleaseNotes = 'Exploratory release. Single Invoke-CpmfUipsCLI dispatcher wrapping all CpmfUipsPack public functions.'
+            ReleaseNotes = 'Patch: pack subcommand now emits "[pack] Packing ..." and "[pack] Staged: ..." Write-Host messages for always-visible terminal feedback. Requires CpmfUipsPack 0.1.1. Full changelog: https://github.com/rpapub/cpmf-uips-pwshcli/blob/main/CHANGELOG.md'
         }
     }
 }

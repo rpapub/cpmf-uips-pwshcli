@@ -7,7 +7,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [Unreleased]
+## [0.1.1] — 2026-03-21
+
+### Added
+
+- **Pack progress feedback** — `Invoke-CpmfUipsCLI pack` now emits `[pack] Packing <name> …`
+  before dispatching and `[pack] Staged: <file>` for each staged nupkg on success. These
+  `Write-Host` messages are always visible without `-Verbose`, preventing the silent-hang
+  appearance during long uipcli runs.
+
+### Changed
+
+- `RequiredModules` bumped to `CpmfUipsPack 0.1.1` to pick up the noise-filtered failure
+  output and GUID temp-folder fix.
 
 ---
 
