@@ -1,0 +1,10 @@
+# PowerShell
+*.ps1xml
+!CpmfUipsCLI/en-US/*.xml
+
+# Test artifacts
+TestResults/
+coverage/
+
+# Local override settings
+*.local.psd1
