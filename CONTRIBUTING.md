@@ -62,6 +62,24 @@ blocks the push if either fails.
 The hook only activates after running `scripts/Install-GitHooks.ps1` once.
 Without that step git uses `.git/hooks/` (empty on a fresh clone).
 
+## Dependency range convention
+
+`RequiredModules` uses `ModuleVersion` + `MaximumVersion` to express a patch range:
+
+```powershell
+@{ ModuleName = 'CpmfUipsPack'; ModuleVersion = '0.1.0'; MaximumVersion = '0.1.9999' }
+```
+
+This accepts any `0.1.x` patch automatically via `Update-Module`, while blocking
+a future `0.2.0` that may contain breaking changes.
+
+When `CpmfUipsPack` ships a new **minor** version, bump `CpmfUipsCLI`'s own minor
+version and shift both bounds:
+
+```powershell
+@{ ModuleName = 'CpmfUipsPack'; ModuleVersion = '0.2.0'; MaximumVersion = '0.2.9999' }
+```
+
 ## Releasing
 
 1. Bump `ModuleVersion` in `CpmfUipsCLI/CpmfUipsCLI.psd1`
