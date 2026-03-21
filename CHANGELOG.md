@@ -11,9 +11,9 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [0.0.1] — 2026-03-21
+## [0.1.0] — 2026-03-21
 
-Exploratory release. Establishes the module structure and dispatch pattern.
+Initial release. Establishes the module structure and dispatch pattern.
 
 ### Added
 
@@ -52,5 +52,5 @@ Exploratory release. Establishes the module structure and dispatch pattern.
 - `docs/reference/Invoke-CpmfUipsCLI.md` — platyPS-generated reference page
 - `CpmfUipsCLI/en-US/CpmfUipsCLI-help.xml` — MAML help file
 
-[Unreleased]: https://github.com/rpapub/cpmf-uips-pwshcli/compare/v0.0.1...HEAD
-[0.0.1]: https://github.com/rpapub/cpmf-uips-pwshcli/releases/tag/v0.0.1
+[Unreleased]: https://github.com/rpapub/cpmf-uips-pwshcli/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/rpapub/cpmf-uips-pwshcli/releases/tag/v0.1.0
