@@ -122,8 +122,9 @@ function Invoke-CpmfUipsCLI {
         $PSBoundParameters['NoBump'] = $NoBump
     }
 
-    # Remove $Command before splatting — it is not a CpmfUipsPack parameter.
-    $forwardParams = $PSBoundParameters.Clone()
+    # Build a plain hashtable copy for splatting — PSBoundParametersDictionary has no .Clone().
+    $forwardParams = @{}
+    foreach ($kv in $PSBoundParameters.GetEnumerator()) { $forwardParams[$kv.Key] = $kv.Value }
     $forwardParams.Remove('Command') | Out-Null
 
     # Also remove CLI-only params not accepted by specific subcommands.
