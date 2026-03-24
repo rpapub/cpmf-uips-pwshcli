@@ -35,7 +35,7 @@ jobs:
       - name: Install CpmfUipsPack dependency
         shell: pwsh
         run: |
-          Install-Module CpmfUipsPack -Scope CurrentUser -Force -MinimumVersion 0.1.0
+          Install-Module CpmfUipsPack -Scope CurrentUser -Force -MinimumVersion 0.2.0
 
       - name: Validate manifest
         shell: pwsh
