@@ -1,6 +1,6 @@
 @{
     RootModule        = 'CpmfUipsCLI.psm1'
-    ModuleVersion     = '0.2.0'
+    ModuleVersion     = '0.2.1'
     GUID              = '4c877d80-6d0c-403e-b0f2-02120b868ef8'
     Author            = 'Christian Prior-Mamulyan'
     CompanyName       = 'cprima'
@@ -24,7 +24,7 @@
             Tags        = @('UiPath', 'RPA', 'NuGet', 'CI', 'pack', 'cli', 'cpmf-uips')
             LicenseUri  = 'https://github.com/rpapub/cpmf-uips-pwshcli/blob/main/LICENSE'
             ProjectUri  = 'https://github.com/rpapub/cpmf-uips-pwshcli'
-            ReleaseNotes = 'Add analyze subcommand, -Backend uipcli|uipathcli parameter, install-uipathcli/uninstall-uipathcli subcommands. Requires CpmfUipsPack 0.2.0. Full changelog: https://github.com/rpapub/cpmf-uips-pwshcli/blob/main/CHANGELOG.md'
+            ReleaseNotes = 'Fix install-tool/uninstall-tool: translate -CliVersionNet6/-CliVersionNet8 to -CliVersion before forwarding to CpmfUipsPack. Full changelog: https://github.com/rpapub/cpmf-uips-pwshcli/blob/main/CHANGELOG.md'
         }
     }
 }
