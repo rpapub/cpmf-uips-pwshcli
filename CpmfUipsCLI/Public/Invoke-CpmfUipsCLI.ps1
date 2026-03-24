@@ -133,7 +133,6 @@ function Invoke-CpmfUipsCLI {
     $forwardParams.Remove('Command') | Out-Null
 
     # Also remove CLI-only params not accepted by specific subcommands.
-    $toolOnly     = @('CliVersionNet6', 'CliVersionNet8', 'ToolBase')
     $configOnly   = @('Force')
 
     switch ($Command) {
