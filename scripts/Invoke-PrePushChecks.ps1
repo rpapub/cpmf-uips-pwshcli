@@ -22,6 +22,12 @@ Set-Location $repoRoot
 # Make the local module importable by name (mirrors the CI step "Add module to PSModulePath")
 $env:PSModulePath = "$repoRoot;$env:PSModulePath"
 
+# Ensure CpmfUipsPack dependency is available (install from PSGallery if missing)
+if (-not (Get-Module CpmfUipsPack -ListAvailable | Where-Object { $_.Version -ge [version]'0.2.0' })) {
+    Write-Host '[pre-push] Installing CpmfUipsPack dependency from PSGallery ...'
+    Install-Module CpmfUipsPack -Scope CurrentUser -Force -MinimumVersion 0.2.0
+}
+
 Write-Host '[pre-push] PSScriptAnalyzer ...'
 $findings = Invoke-ScriptAnalyzer -Path ./CpmfUipsCLI -Recurse -Settings ./CpmfUipsCLI/PSScriptAnalyzerSettings.psd1
 if ($findings) {
