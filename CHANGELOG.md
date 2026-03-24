@@ -7,6 +7,17 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.2.1] — 2026-03-24
+
+### Fixed
+
+- **`install-tool` / `uninstall-tool`** — translate `-CliVersionNet6` / `-CliVersionNet8`
+  to `-CliVersion` before forwarding to `Install-CpmfUipsPackCommandLineTool` /
+  `Uninstall-CpmfUipsPackCommandLineTool`. Previously passing `-CliVersionNet8` threw
+  `A parameter cannot be found that matches parameter name 'CliVersionNet8'`. Closes #10.
+
+---
+
 ## [0.2.0] — 2026-03-24
 
 ### Added

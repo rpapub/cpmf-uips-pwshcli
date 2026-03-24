@@ -176,17 +176,33 @@ function Invoke-CpmfUipsCLI {
         }
 
         'install-tool' {
-            $keep = $toolOnly + @('WhatIf', 'Confirm', 'Verbose')
+            $keep = @('ToolBase', 'WhatIf', 'Confirm', 'Verbose')
             $toRemove = @($forwardParams.Keys) | Where-Object { $_ -notin $keep }
             foreach ($k in $toRemove) { $forwardParams.Remove($k) | Out-Null }
+            # Translate CliVersionNet6/Net8 → CliVersion for Install-CpmfUipsPackCommandLineTool
+            if ($PSBoundParameters.ContainsKey('CliVersionNet8')) {
+                $forwardParams['CliVersion'] = $CliVersionNet8
+            } elseif ($PSBoundParameters.ContainsKey('CliVersionNet6')) {
+                $forwardParams['CliVersion'] = $CliVersionNet6
+            } elseif ($PSBoundParameters.ContainsKey('CliVersion')) {
+                $forwardParams['CliVersion'] = $CliVersion
+            }
             Write-Verbose "[CpmfUipsCLI] → Install-CpmfUipsPackCommandLineTool"
             Install-CpmfUipsPackCommandLineTool @forwardParams
         }
 
         'uninstall-tool' {
-            $keep = $toolOnly + @('WhatIf', 'Confirm', 'Verbose')
+            $keep = @('ToolBase', 'WhatIf', 'Confirm', 'Verbose')
             $toRemove = @($forwardParams.Keys) | Where-Object { $_ -notin $keep }
             foreach ($k in $toRemove) { $forwardParams.Remove($k) | Out-Null }
+            # Translate CliVersionNet6/Net8 → CliVersion for Uninstall-CpmfUipsPackCommandLineTool
+            if ($PSBoundParameters.ContainsKey('CliVersionNet8')) {
+                $forwardParams['CliVersion'] = $CliVersionNet8
+            } elseif ($PSBoundParameters.ContainsKey('CliVersionNet6')) {
+                $forwardParams['CliVersion'] = $CliVersionNet6
+            } elseif ($PSBoundParameters.ContainsKey('CliVersion')) {
+                $forwardParams['CliVersion'] = $CliVersion
+            }
             Write-Verbose "[CpmfUipsCLI] → Uninstall-CpmfUipsPackCommandLineTool"
             Uninstall-CpmfUipsPackCommandLineTool @forwardParams
         }
