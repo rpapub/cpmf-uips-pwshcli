@@ -23,6 +23,17 @@ Install-Module CpmfUipsCLI -Scope CurrentUser
 
 `CpmfUipsPack` is declared as a `RequiredModules` dependency and will be installed automatically.
 
+### Update
+
+```powershell
+# If originally installed via Install-Module:
+Update-Module CpmfUipsCLI
+
+# If installed any other way (local copy, manual import, etc.):
+Install-Module CpmfUipsCLI -Scope CurrentUser -Force
+Import-Module CpmfUipsCLI -Force
+```
+
 ---
 
 ## Quick start
