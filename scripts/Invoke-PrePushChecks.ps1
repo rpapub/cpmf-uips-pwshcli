@@ -19,6 +19,9 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path $PSScriptRoot -Parent
 Set-Location $repoRoot
 
+# Make the local module importable by name (mirrors the CI step "Add module to PSModulePath")
+$env:PSModulePath = "$repoRoot;$env:PSModulePath"
+
 Write-Host '[pre-push] PSScriptAnalyzer ...'
 $findings = Invoke-ScriptAnalyzer -Path ./CpmfUipsCLI -Recurse -Settings ./CpmfUipsCLI/PSScriptAnalyzerSettings.psd1
 if ($findings) {
