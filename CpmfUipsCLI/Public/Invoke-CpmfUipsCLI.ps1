@@ -9,13 +9,16 @@ function Invoke-CpmfUipsCLI {
         applied as defaults before forwarding, following the same four-layer hierarchy as CpmfUipsPack.
 
         Subcommands:
-          pack              Invoke-CpmfUipsPack
-          install-tool      Install-CpmfUipsPackCommandLineTool
-          uninstall-tool    Uninstall-CpmfUipsPackCommandLineTool
-          install-config    Install-CpmfUipsPackConfig
-          uninstall-config  Uninstall-CpmfUipsPackConfig
-          install-hook      Install-CpmfUipsPackGitHook
-          diagnose          Get-CpmfUipsPackDiagnostics
+          pack                  Invoke-CpmfUipsPack
+          analyze               Invoke-CpmfUipsAnalyze
+          install-tool          Install-CpmfUipsPackCommandLineTool
+          uninstall-tool        Uninstall-CpmfUipsPackCommandLineTool
+          install-uipathcli     Install-UipathcliTool
+          uninstall-uipathcli   Uninstall-UipathcliTool
+          install-config        Install-CpmfUipsPackConfig
+          uninstall-config      Uninstall-CpmfUipsPackConfig
+          install-hook          Install-CpmfUipsPackGitHook
+          diagnose              Get-CpmfUipsPackDiagnostics
 
     .PARAMETER Command
         The subcommand to execute. Tab-completable.
@@ -80,13 +83,15 @@ function Invoke-CpmfUipsCLI {
     [OutputType([string[]], ParameterSetName = '__AllParameterSets')]
     param(
         [Parameter(Mandatory, Position = 0)]
-        [ValidateSet('pack', 'install-tool', 'uninstall-tool', 'install-config', 'uninstall-config', 'install-hook', 'diagnose')]
+        [ValidateSet('pack', 'analyze', 'install-tool', 'uninstall-tool', 'install-uipathcli', 'uninstall-uipathcli', 'install-config', 'uninstall-config', 'install-hook', 'diagnose')]
         [string] $Command,
 
-        # --- shared / pack ---
+        # --- shared / pack / analyze ---
         [string]   $ProjectJson,
         [string]   $FeedPath,
         [string[]] $Targets,
+        [ValidateSet('uipcli', 'uipathcli')]
+        [string]   $Backend,
         [switch]   $NoBump,
         [switch]   $UseWorktree,
         [switch]   $SkipInstall,
@@ -143,6 +148,31 @@ function Invoke-CpmfUipsCLI {
                 Write-Host "[pack] Staged: $(Split-Path $path -Leaf)"
             }
             Write-Output $packResults
+        }
+
+        'analyze' {
+            $remove = @('FeedPath', 'UseWorktree', 'WorktreeSibling', 'MultiTfm', 'Force')
+            foreach ($k in $remove) { $forwardParams.Remove($k) | Out-Null }
+            Write-Verbose "[CpmfUipsCLI] → Invoke-CpmfUipsAnalyze"
+            $projectName = if ($ProjectJson) { Split-Path (Split-Path $ProjectJson -Parent) -Leaf } else { '(unknown)' }
+            Write-Host "[analyze] Analyzing $projectName …"
+            Write-Output (Invoke-CpmfUipsAnalyze @forwardParams)
+        }
+
+        'install-uipathcli' {
+            $keep = @('ToolBase', 'WhatIf', 'Confirm', 'Verbose')
+            $toRemove = @($forwardParams.Keys) | Where-Object { $_ -notin $keep }
+            foreach ($k in $toRemove) { $forwardParams.Remove($k) | Out-Null }
+            Write-Verbose "[CpmfUipsCLI] → Install-UipathcliTool"
+            Install-UipathcliTool @forwardParams
+        }
+
+        'uninstall-uipathcli' {
+            $keep = @('ToolBase', 'WhatIf', 'Confirm', 'Verbose')
+            $toRemove = @($forwardParams.Keys) | Where-Object { $_ -notin $keep }
+            foreach ($k in $toRemove) { $forwardParams.Remove($k) | Out-Null }
+            Write-Verbose "[CpmfUipsCLI] → Uninstall-UipathcliTool"
+            Uninstall-UipathcliTool @forwardParams
         }
 
         'install-tool' {

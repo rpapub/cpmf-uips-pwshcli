@@ -7,6 +7,23 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.2.0] — 2026-03-24
+
+### Added
+
+- **`analyze` subcommand** — dispatches to `Invoke-CpmfUipsAnalyze` in
+  CpmfUipsPack. Returns analyzer output as `[string[]]`.
+- **`-Backend uipcli|uipathcli`** — forwarded to both `pack` and `analyze`
+  subcommands. Defaults to `uipcli` (no breaking change).
+- **`install-uipathcli` / `uninstall-uipathcli` subcommands** — manage the
+  uipathcli Go binary via `Install-UipathcliTool` / `Uninstall-UipathcliTool`.
+
+### Changed
+
+- Requires CpmfUipsPack `0.2.0`.
+
+---
+
 ## [0.1.1] — 2026-03-21
 
 ### Added
