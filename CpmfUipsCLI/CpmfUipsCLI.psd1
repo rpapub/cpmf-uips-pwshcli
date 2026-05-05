@@ -1,6 +1,6 @@
 @{
     RootModule        = 'CpmfUipsCLI.psm1'
-    ModuleVersion     = '0.2.1'
+    ModuleVersion     = '0.2.2'
     GUID              = '4c877d80-6d0c-403e-b0f2-02120b868ef8'
     Author            = 'Christian Prior-Mamulyan'
     CompanyName       = 'cprima'
@@ -9,7 +9,7 @@
     PowerShellVersion = '7.0'
 
     RequiredModules   = @(
-        @{ ModuleName = 'CpmfUipsPack'; ModuleVersion = '0.2.0'; MaximumVersion = '0.2.9999' }
+        @{ ModuleName = 'CpmfUipsPack'; ModuleVersion = '0.2.5'; MaximumVersion = '0.2.9999' }
     )
 
     FunctionsToExport = @(
@@ -24,7 +24,7 @@
             Tags        = @('UiPath', 'RPA', 'NuGet', 'CI', 'pack', 'cli', 'cpmf-uips')
             LicenseUri  = 'https://github.com/rpapub/cpmf-uips-pwshcli/blob/main/LICENSE'
             ProjectUri  = 'https://github.com/rpapub/cpmf-uips-pwshcli'
-            ReleaseNotes = 'Fix install-tool/uninstall-tool: translate -CliVersionNet6/-CliVersionNet8 to -CliVersion before forwarding to CpmfUipsPack. Full changelog: https://github.com/rpapub/cpmf-uips-pwshcli/blob/main/CHANGELOG.md'
+            ReleaseNotes = 'Require CpmfUipsPack >= 0.2.5 (default uipcli 25.10.15, fixed version dispatch). Full changelog: https://github.com/rpapub/cpmf-uips-pwshcli/blob/main/CHANGELOG.md'
         }
     }
 }
