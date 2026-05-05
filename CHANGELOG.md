@@ -7,6 +7,16 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.2.2] — 2026-05-05
+
+### Changed
+
+- **`CpmfUipsCLI.psd1`** — `RequiredModules` minimum version raised from `0.2.0` to `0.2.5`.
+  `CpmfUipsPack 0.2.5` defaults `install-tool` / `uninstall-tool` to uipcli `25.10.15` and
+  fixes version dispatch for the dotnet global tool packaging format introduced in `25.10.2-20251124-7`.
+
+---
+
 ## [0.2.1] — 2026-03-24
 
 ### Fixed
