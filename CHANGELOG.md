@@ -7,6 +7,24 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.3.0] — 2026-05-06
+
+### Changed
+
+- **Path-first CLI configuration** — `CPMF_UIPS_UIPCLI_NET6_PATH`,
+  `CPMF_UIPS_UIPCLI_NET8_PATH`, and `CPMF_UIPS_TOOLBASE_PATH` are now
+  first-class inputs. Repo-root `cpmf-uips.psd1` supplies opinionated defaults,
+  env vars override config, and compatibility `UIPS_*` values are still honored
+  during the transition.
+
+- **`Invoke-CpmfUipsCLI`** — now accepts `-Version` to print the wrapper and
+  dependency versions without dispatching a subcommand.
+
+- **Required module floor** — `CpmfUipsCLI.psd1` now requires
+  `CpmfUipsPack >= 0.3.0`.
+
+---
+
 ## [0.2.2] — 2026-05-05
 
 ### Changed
