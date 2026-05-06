@@ -5,8 +5,8 @@ function Invoke-CpmfUipsCLI {
 
     .DESCRIPTION
         Invoke-CpmfUipsCLI routes a subcommand string to the corresponding CpmfUipsPack function.
-        All remaining parameters are forwarded via splatting. UIPS_* environment variables are
-        applied as defaults before forwarding, following the same four-layer hierarchy as CpmfUipsPack.
+        All remaining parameters are forwarded via splatting. Repo-root defaults and environment
+        variables are applied before forwarding, following the same path-first hierarchy as CpmfUipsPack.
 
         Subcommands:
           pack                  Invoke-CpmfUipsPack
@@ -21,13 +21,22 @@ function Invoke-CpmfUipsCLI {
           diagnose              Get-CpmfUipsPackDiagnostics
 
     .PARAMETER Command
-        The subcommand to execute. Tab-completable.
+        The subcommand to execute. Tab-completable. Optional when using -Version.
+
+    .PARAMETER Version
+        Print the wrapper and dependency versions and exit without dispatching a subcommand.
 
     .PARAMETER ProjectJson
         Path to the UiPath project.json. Forwarded to pack and install-hook subcommands.
 
     .PARAMETER FeedPath
-        NuGet feed path. Forwarded to pack. Defaults to UIPS_FEEDPATH env var if set.
+        NuGet feed path. Forwarded to pack. Defaults to the repo config / env var layer if set.
+
+    .PARAMETER UipcliPathNet6
+        Absolute path to the net6 uipcli.exe. Forwarded to pack and install-tool.
+
+    .PARAMETER UipcliPathNet8
+        Absolute path to the net8 uipcli.exe. Forwarded to pack and install-tool.
 
     .PARAMETER Targets
         Target TFMs to build. E.g. @('net6') or @('net6','net8'). Forwarded to pack.
@@ -59,6 +68,9 @@ function Invoke-CpmfUipsCLI {
     .PARAMETER ToolBase
         Base directory for managed tool installs. Forwarded to pack, install-tool, uninstall-tool.
 
+    .PARAMETER ToolBasePath
+        Canonical tool root directory. Same as -ToolBase; kept for the shared path-var naming convention.
+
     .PARAMETER Force
         Overwrite existing config. Forwarded to install-config.
 
@@ -82,9 +94,10 @@ function Invoke-CpmfUipsCLI {
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([string[]], ParameterSetName = '__AllParameterSets')]
     param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Position = 0)]
         [ValidateSet('pack', 'analyze', 'install-tool', 'uninstall-tool', 'install-uipathcli', 'uninstall-uipathcli', 'install-config', 'uninstall-config', 'install-hook', 'diagnose')]
         [string] $Command,
+        [switch] $Version,
 
         # --- shared / pack / analyze ---
         [string]   $ProjectJson,
@@ -102,29 +115,39 @@ function Invoke-CpmfUipsCLI {
         [string]   $CliVersion,        # deprecated passthrough
         [string]   $CliVersionNet6,
         [string]   $CliVersionNet8,
-        [string]   $ToolBase,
+        [string]   $UipcliPathNet6,
+        [string]   $UipcliPathNet8,
+        [Alias('ToolBase')]
+        [string]   $ToolBasePath = (Join-Path $env:LOCALAPPDATA 'cpmf\tools'),
 
         # --- install-config ---
         [switch]   $Force
     )
 
-    # Inject UIPS_* env var defaults before forwarding (Layer 2 of config hierarchy).
-    # Explicit parameters always win — only apply env var when the caller did not bind the param.
-    if (-not $PSBoundParameters.ContainsKey('FeedPath') -and $env:UIPS_FEEDPATH) {
-        $FeedPath = $env:UIPS_FEEDPATH
-        $PSBoundParameters['FeedPath'] = $FeedPath
+    if ($Version) {
+        $cliVersion = (Get-Module CpmfUipsCLI).Version
+        $packVersion = (Get-Module CpmfUipsPack).Version
+        Write-Output "CpmfUipsCLI $cliVersion (CpmfUipsPack $packVersion)"
+        return
     }
-    if (-not $PSBoundParameters.ContainsKey('ToolBase') -and $env:UIPS_TOOLBASE) {
-        $ToolBase = $env:UIPS_TOOLBASE
-        $PSBoundParameters['ToolBase'] = $ToolBase
+
+    if ([string]::IsNullOrWhiteSpace($Command)) {
+        throw "Command is required unless -Version is specified."
     }
-    if (-not $PSBoundParameters.ContainsKey('Targets') -and $env:UIPS_TARGETS) {
-        $Targets = $env:UIPS_TARGETS -split ','
-        $PSBoundParameters['Targets'] = $Targets
-    }
-    if (-not $PSBoundParameters.ContainsKey('NoBump') -and $env:UIPS_NO_BUMP -eq '1') {
-        $NoBump = $true
-        $PSBoundParameters['NoBump'] = $NoBump
+
+    $cfg = Get-CpmfUipsCLIEffectiveConfig
+    foreach ($key in @('FeedPath', 'Targets', 'NoBump', 'SkipInstall', 'UseWorktree', 'WorktreeBase', 'WorktreeSibling', 'MultiTfm', 'Backend', 'CliVersionNet6', 'CliVersionNet8', 'UipcliPathNet6', 'UipcliPathNet8', 'ToolBasePath')) {
+        if (-not $PSBoundParameters.ContainsKey($key) -and $cfg.ContainsKey($key)) {
+            if ($key -in @('Targets')) {
+                $value = [string[]]$cfg[$key]
+            } elseif ($key -in @('NoBump', 'SkipInstall', 'UseWorktree', 'MultiTfm')) {
+                $value = [bool]$cfg[$key]
+            } else {
+                $value = $cfg[$key]
+            }
+            Set-Variable -Name $key -Value $value
+            $PSBoundParameters[$key] = $value
+        }
     }
 
     # Build a plain hashtable copy for splatting — PSBoundParametersDictionary has no .Clone().
@@ -159,7 +182,7 @@ function Invoke-CpmfUipsCLI {
         }
 
         'install-uipathcli' {
-            $keep = @('ToolBase', 'WhatIf', 'Confirm', 'Verbose')
+            $keep = @('ToolBasePath', 'WhatIf', 'Confirm', 'Verbose')
             $toRemove = @($forwardParams.Keys) | Where-Object { $_ -notin $keep }
             foreach ($k in $toRemove) { $forwardParams.Remove($k) | Out-Null }
             Write-Verbose "[CpmfUipsCLI] → Install-UipathcliTool"
@@ -167,7 +190,7 @@ function Invoke-CpmfUipsCLI {
         }
 
         'uninstall-uipathcli' {
-            $keep = @('ToolBase', 'WhatIf', 'Confirm', 'Verbose')
+            $keep = @('ToolBasePath', 'WhatIf', 'Confirm', 'Verbose')
             $toRemove = @($forwardParams.Keys) | Where-Object { $_ -notin $keep }
             foreach ($k in $toRemove) { $forwardParams.Remove($k) | Out-Null }
             Write-Verbose "[CpmfUipsCLI] → Uninstall-UipathcliTool"
@@ -175,11 +198,14 @@ function Invoke-CpmfUipsCLI {
         }
 
         'install-tool' {
-            $keep = @('ToolBase', 'WhatIf', 'Confirm', 'Verbose')
+            $keep = @('ToolBasePath', 'WhatIf', 'Confirm', 'Verbose')
             $toRemove = @($forwardParams.Keys) | Where-Object { $_ -notin $keep }
             foreach ($k in $toRemove) { $forwardParams.Remove($k) | Out-Null }
-            # Translate CliVersionNet6/Net8 → CliVersion for Install-CpmfUipsPackCommandLineTool
-            if ($PSBoundParameters.ContainsKey('CliVersionNet8')) {
+            if ($PSBoundParameters.ContainsKey('UipcliPathNet8')) {
+                $forwardParams['UipcliPath'] = $UipcliPathNet8
+            } elseif ($PSBoundParameters.ContainsKey('UipcliPathNet6')) {
+                $forwardParams['UipcliPath'] = $UipcliPathNet6
+            } elseif ($PSBoundParameters.ContainsKey('CliVersionNet8')) {
                 $forwardParams['CliVersion'] = $CliVersionNet8
             } elseif ($PSBoundParameters.ContainsKey('CliVersionNet6')) {
                 $forwardParams['CliVersion'] = $CliVersionNet6
@@ -191,11 +217,14 @@ function Invoke-CpmfUipsCLI {
         }
 
         'uninstall-tool' {
-            $keep = @('ToolBase', 'WhatIf', 'Confirm', 'Verbose')
+            $keep = @('ToolBasePath', 'WhatIf', 'Confirm', 'Verbose')
             $toRemove = @($forwardParams.Keys) | Where-Object { $_ -notin $keep }
             foreach ($k in $toRemove) { $forwardParams.Remove($k) | Out-Null }
-            # Translate CliVersionNet6/Net8 → CliVersion for Uninstall-CpmfUipsPackCommandLineTool
-            if ($PSBoundParameters.ContainsKey('CliVersionNet8')) {
+            if ($PSBoundParameters.ContainsKey('UipcliPathNet8')) {
+                $forwardParams['UipcliPath'] = $UipcliPathNet8
+            } elseif ($PSBoundParameters.ContainsKey('UipcliPathNet6')) {
+                $forwardParams['UipcliPath'] = $UipcliPathNet6
+            } elseif ($PSBoundParameters.ContainsKey('CliVersionNet8')) {
                 $forwardParams['CliVersion'] = $CliVersionNet8
             } elseif ($PSBoundParameters.ContainsKey('CliVersionNet6')) {
                 $forwardParams['CliVersion'] = $CliVersionNet6

@@ -1,6 +1,6 @@
 # CpmfUipsCLI
 
-A thin PowerShell 7 CLI wrapper. Initially wraps [CpmfUipsPack](https://github.com/rpapub/cpmf-uips-pwshpack), providing a single `Invoke-CpmfUipsCLI` entry point with tab-completable subcommands and `UIPS_*` environment variable injection.
+A thin PowerShell 7 CLI wrapper. It wraps [CpmfUipsPack](https://github.com/rpapub/cpmf-uips-pwshpack), providing a single `Invoke-CpmfUipsCLI` entry point with tab-completable subcommands and shared path-first configuration via `CPMF_UIPS_*_PATH`.
 
 > **Trademark notice:** UiPath and UiPath Studio are trademarks of UiPath Inc.
 > This module is not affiliated with or endorsed by UiPath Inc.
@@ -11,7 +11,7 @@ A thin PowerShell 7 CLI wrapper. Initially wraps [CpmfUipsPack](https://github.c
 
 - PowerShell 7.0 or later
 - Windows (x64)
-- [CpmfUipsPack](https://www.powershellgallery.com/packages/CpmfUipsPack) >= 0.1.0 (installed automatically as a `RequiredModules` dependency)
+- [CpmfUipsPack](https://www.powershellgallery.com/packages/CpmfUipsPack) >= 0.3.0 (installed automatically as a `RequiredModules` dependency)
 
 ---
 
@@ -41,6 +41,9 @@ Import-Module CpmfUipsCLI -Force
 ```powershell
 # Bump version, pack, copy .nupkg to the configured feed
 Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyProject\project.json'
+
+# Show the wrapper and dependency versions and exit
+Invoke-CpmfUipsCLI -Version
 
 # Run diagnostics (pseudonymized — safe to paste into a GitHub issue)
 Invoke-CpmfUipsCLI diagnose
@@ -93,24 +96,27 @@ Invoke-CpmfUipsCLI install-hook -ProjectJson 'C:\repos\MyProject\project.json'
 
 ## Configuration
 
-`CpmfUipsCLI` inherits the full four-layer configuration hierarchy from `CpmfUipsPack`. Settings are applied in priority order — a higher-priority source always wins.
+`CpmfUipsCLI` uses the same path-first configuration model as `CpmfUipsPack`. Settings are applied in priority order — a higher-priority source always wins.
 
 ```
 Priority (lowest → highest)
 ────────────────────────────────────────────────────────────────
- 1. User config     %LOCALAPPDATA%\cpmf\CpmfUipsPack\config.psd1
- 2. Env vars        UIPS_*
+ 1. Repo config     .\cpmf-uips.psd1
+ 2. Env vars        CPMF_UIPS_*_PATH, UIPS_* (compatibility)
  3. Project config  -ConfigFile .\uipath-pack.psd1
  4. Parameters      -FeedPath, -Targets, ...   ← always win
 ────────────────────────────────────────────────────────────────
 ```
 
-`CpmfUipsCLI` applies `UIPS_*` env vars at the CLI layer before forwarding to `CpmfUipsPack`, so both modules honour them correctly.
+`CpmfUipsCLI` applies the repo-root defaults and environment variables at the CLI layer before forwarding to `CpmfUipsPack`, so both modules honour them correctly.
 
 | Variable | Parameter | Notes |
 |---|---|---|
-| `UIPS_FEEDPATH` | `-FeedPath` | |
-| `UIPS_TOOLBASE` | `-ToolBase` | |
+| `CPMF_UIPS_UIPCLI_NET6_PATH` | `-UipcliPathNet6` | path to the .NET 6 `uipcli.exe` |
+| `CPMF_UIPS_UIPCLI_NET8_PATH` | `-UipcliPathNet8` | path to the .NET 8 `uipcli.exe` |
+| `CPMF_UIPS_TOOLBASE_PATH` | `-ToolBasePath` | root directory for managed tools |
+| `UIPS_FEEDPATH` | `-FeedPath` | compatibility |
+| `UIPS_TOOLBASE` | `-ToolBasePath` | compatibility |
 | `UIPS_TARGETS` | `-Targets` | comma-separated: `net6,net8` |
 | `UIPS_CLIVERSION_NET6` | `-CliVersionNet6` | |
 | `UIPS_CLIVERSION_NET8` | `-CliVersionNet8` | |
@@ -118,8 +124,8 @@ Priority (lowest → highest)
 | `UIPS_NO_BUMP` | `-NoBump` | any non-empty value = `$true` |
 
 ```powershell
-# Example: CI pipeline injects feed path via env var
-$env:UIPS_FEEDPATH = '\\buildserver\nugetfeed'
+# Example: CI pipeline injects tool path via env var
+$env:CPMF_UIPS_TOOLBASE_PATH = 'D:\cpmf\tools'
 Invoke-CpmfUipsCLI pack -ProjectJson '...'
 ```
 

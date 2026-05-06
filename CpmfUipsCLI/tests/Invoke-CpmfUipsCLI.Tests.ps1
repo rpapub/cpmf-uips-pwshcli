@@ -9,6 +9,12 @@ BeforeAll {
 
 Describe 'Invoke-CpmfUipsCLI — dispatch' {
 
+    Context 'version shortcut' {
+        It 'prints wrapper and dependency versions without a command' {
+            (Invoke-CpmfUipsCLI -Version) | Should -BeLike 'CpmfUipsCLI * (CpmfUipsPack *)'
+        }
+    }
+
     Context 'pack subcommand' {
         It 'forwards to Invoke-CpmfUipsPack' {
             Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack { return @('C:\feed\MyBot.1.0.0.nupkg') }
