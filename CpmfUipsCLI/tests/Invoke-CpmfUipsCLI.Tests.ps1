@@ -3,7 +3,13 @@
 
 BeforeAll {
     # Test the module source from the repo under development.
-    Import-Module 'D:\github.com\rpapub\cpmf-uips-pwshpack\CpmfUipsPack\CpmfUipsPack.psd1' -Force -ErrorAction Stop
+    $packRepoRoot = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent) 'cpmf-uips-pwshpack'
+    $packManifest = Join-Path $packRepoRoot 'CpmfUipsPack\CpmfUipsPack.psd1'
+    if (Test-Path -LiteralPath $packManifest) {
+        Import-Module $packManifest -Force -ErrorAction Stop
+    } else {
+        Import-Module CpmfUipsPack -Force -ErrorAction Stop
+    }
     Import-Module (Join-Path $PSScriptRoot '../CpmfUipsCLI.psd1') -Force -ErrorAction Stop
 }
 
