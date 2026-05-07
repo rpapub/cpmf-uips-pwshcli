@@ -115,6 +115,7 @@ Priority (lowest → highest)
 | `CPMF_UIPS_UIPCLI_NET6_PATH` | `-UipcliPathNet6` | path to the .NET 6 `uipcli.exe` |
 | `CPMF_UIPS_UIPCLI_NET8_PATH` | `-UipcliPathNet8` | path to the .NET 8 `uipcli.exe` |
 | `CPMF_UIPS_TOOLBASE_PATH` | `-ToolBasePath` | root directory for managed tools |
+| `CPMF_UIPS_OUTPUT_PATH` | `-OutputPath` | base directory for native `uipcli` output |
 | `UIPS_FEEDPATH` | `-FeedPath` | compatibility |
 | `UIPS_TOOLBASE` | `-ToolBasePath` | compatibility |
 | `UIPS_TARGETS` | `-Targets` | comma-separated: `net6,net8` |

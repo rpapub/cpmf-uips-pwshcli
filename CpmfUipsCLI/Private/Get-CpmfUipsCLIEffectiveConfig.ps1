@@ -16,6 +16,8 @@ function Get-CpmfUipsCLIEffectiveConfig {
         CPMF_UIPS_UIPCLI_NET6_PATH → UipcliPathNet6
         CPMF_UIPS_UIPCLI_NET8_PATH → UipcliPathNet8
         CPMF_UIPS_TOOLBASE_PATH    → ToolBasePath
+        CPMF_UIPS_OUTPUT_PATH      → OutputPath
+        CPMF_UIPS_OUTPUT_DIR       → OutputPath (compatibility)
         UIPS_FEEDPATH              → FeedPath
         UIPS_TOOLBASE              → ToolBasePath
         UIPS_TARGETS               → Targets
@@ -64,6 +66,8 @@ function Get-CpmfUipsCLIEffectiveConfig {
         'CPMF_UIPS_UIPCLI_NET6_PATH' = 'UipcliPathNet6'
         'CPMF_UIPS_UIPCLI_NET8_PATH' = 'UipcliPathNet8'
         'CPMF_UIPS_TOOLBASE_PATH'    = 'ToolBasePath'
+        'CPMF_UIPS_OUTPUT_DIR'       = 'OutputPath'
+        'CPMF_UIPS_OUTPUT_PATH'      = 'OutputPath'
         'UIPS_FEEDPATH'              = 'FeedPath'
         'UIPS_TOOLBASE'              = 'ToolBasePath'
         'UIPS_TARGETS'               = 'Targets'

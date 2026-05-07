@@ -2,9 +2,9 @@
 #Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.0' }
 
 BeforeAll {
-    # Tests run against the installed copy (placed by scripts/Test-LocalInstall.ps1).
-    # CpmfUipsPack is pulled in automatically via RequiredModules.
-    Import-Module CpmfUipsCLI -Force -ErrorAction Stop
+    # Test the module source from the repo under development.
+    Import-Module 'D:\github.com\rpapub\cpmf-uips-pwshpack\CpmfUipsPack\CpmfUipsPack.psd1' -Force -ErrorAction Stop
+    Import-Module (Join-Path $PSScriptRoot '../CpmfUipsCLI.psd1') -Force -ErrorAction Stop
 }
 
 Describe 'Invoke-CpmfUipsCLI — dispatch' {
@@ -17,7 +17,7 @@ Describe 'Invoke-CpmfUipsCLI — dispatch' {
 
     Context 'pack subcommand' {
         It 'forwards to Invoke-CpmfUipsPack' {
-            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack { return @('C:\feed\MyBot.1.0.0.nupkg') }
+            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack { return @('C:\Users\Public\UiPath.CLI.Windows\pack-output\MyBot.1.0.0.nupkg') }
 
             $result = Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json'
 
@@ -64,6 +64,33 @@ Describe 'Invoke-CpmfUipsCLI — dispatch' {
 
             $result | Should -Be 'D:\explicit'
             Remove-Item Env:\UIPS_FEEDPATH -ErrorAction SilentlyContinue
+        }
+
+        It 'injects CPMF_UIPS_OUTPUT_PATH env var when OutputPath not bound' {
+            $env:CPMF_UIPS_OUTPUT_PATH = 'C:\Users\Public\UiPath.CLI.Windows\pack-output\test-output-root'
+            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack {
+                param([string]$OutputPath)
+                return @($OutputPath)
+            }
+
+            $result = Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json'
+
+            $result | Should -Be 'C:\Users\Public\UiPath.CLI.Windows\pack-output\test-output-root'
+            Should -Invoke Invoke-CpmfUipsPack -ModuleName CpmfUipsCLI -Times 1
+            Remove-Item Env:\CPMF_UIPS_OUTPUT_PATH -ErrorAction SilentlyContinue
+        }
+
+        It 'explicit -OutputPath overrides CPMF_UIPS_OUTPUT_PATH env var' {
+            $env:CPMF_UIPS_OUTPUT_PATH = 'C:\Users\Public\UiPath.CLI.Windows\pack-output\env-output'
+            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack {
+                param([string]$OutputPath)
+                return @($OutputPath)
+            }
+
+            $result = Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json' -OutputPath 'C:\Users\Public\UiPath.CLI.Windows\pack-output\explicit-output'
+
+            $result | Should -Be 'C:\Users\Public\UiPath.CLI.Windows\pack-output\explicit-output'
+            Remove-Item Env:\CPMF_UIPS_OUTPUT_PATH -ErrorAction SilentlyContinue
         }
     }
 
