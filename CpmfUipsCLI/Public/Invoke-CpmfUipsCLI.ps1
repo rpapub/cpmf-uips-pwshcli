@@ -32,6 +32,10 @@ function Invoke-CpmfUipsCLI {
     .PARAMETER FeedPath
         NuGet feed path. Forwarded to pack. Defaults to the repo config / env var layer if set.
 
+    .PARAMETER OutputPath
+        Base directory for native uipcli pack output. Forwarded to pack. The shared
+        pack module will create a unique child directory under this root for each run.
+
     .PARAMETER UipcliPathNet6
         Absolute path to the net6 uipcli.exe. Forwarded to pack and install-tool.
 
@@ -102,6 +106,7 @@ function Invoke-CpmfUipsCLI {
         # --- shared / pack / analyze ---
         [string]   $ProjectJson,
         [string]   $FeedPath,
+        [string]   $OutputPath,
         [string[]] $Targets,
         [ValidateSet('uipcli', 'uipathcli')]
         [string]   $Backend,
@@ -136,7 +141,7 @@ function Invoke-CpmfUipsCLI {
     }
 
     $cfg = Get-CpmfUipsCLIEffectiveConfig
-    foreach ($key in @('FeedPath', 'Targets', 'NoBump', 'SkipInstall', 'UseWorktree', 'WorktreeBase', 'WorktreeSibling', 'MultiTfm', 'Backend', 'CliVersionNet6', 'CliVersionNet8', 'UipcliPathNet6', 'UipcliPathNet8', 'ToolBasePath')) {
+    foreach ($key in @('FeedPath', 'OutputPath', 'Targets', 'NoBump', 'SkipInstall', 'UseWorktree', 'WorktreeBase', 'WorktreeSibling', 'MultiTfm', 'Backend', 'CliVersionNet6', 'CliVersionNet8', 'UipcliPathNet6', 'UipcliPathNet8', 'ToolBasePath')) {
         if (-not $PSBoundParameters.ContainsKey($key) -and $cfg.ContainsKey($key)) {
             if ($key -in @('Targets')) {
                 $value = [string[]]$cfg[$key]
@@ -173,7 +178,7 @@ function Invoke-CpmfUipsCLI {
         }
 
         'analyze' {
-            $remove = @('FeedPath', 'UseWorktree', 'WorktreeSibling', 'MultiTfm', 'Force')
+            $remove = @('FeedPath', 'OutputPath', 'UseWorktree', 'WorktreeSibling', 'MultiTfm', 'Force')
             foreach ($k in $remove) { $forwardParams.Remove($k) | Out-Null }
             Write-Verbose "[CpmfUipsCLI] → Invoke-CpmfUipsAnalyze"
             $projectName = if ($ProjectJson) { Split-Path (Split-Path $ProjectJson -Parent) -Leaf } else { '(unknown)' }
