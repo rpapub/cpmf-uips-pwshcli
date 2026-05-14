@@ -17,7 +17,7 @@ Describe 'Invoke-CpmfUipsCLI — dispatch' {
 
     Context 'version shortcut' {
         It 'prints wrapper and dependency versions without a command' {
-            (Invoke-CpmfUipsCLI -Version) | Should -BeLike 'CpmfUipsCLI * (CpmfUipsPack *)'
+            (Invoke-CpmfUipsCLI -ShowVersion) | Should -BeLike 'CpmfUipsCLI * (CpmfUipsPack *)'
         }
     }
 
@@ -43,6 +43,19 @@ Describe 'Invoke-CpmfUipsCLI — dispatch' {
             { Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json' -Force } |
                 Should -Not -Throw
             Should -Invoke Invoke-CpmfUipsPack -ModuleName CpmfUipsCLI -Times 1
+        }
+
+        It 'forwards -ProjectVersion to Invoke-CpmfUipsPack' {
+            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack {
+                param([string]$ProjectVersion)
+                return @($ProjectVersion)
+            }
+
+            $result = Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json' -ProjectVersion '2.1.0'
+
+            $result | Should -Be '2.1.0'
+            Should -Invoke Invoke-CpmfUipsPack -ModuleName CpmfUipsCLI -Times 1 `
+                -ParameterFilter { $ProjectVersion -eq '2.1.0' }
         }
 
         It 'injects UIPS_FEEDPATH env var when FeedPath not bound' {

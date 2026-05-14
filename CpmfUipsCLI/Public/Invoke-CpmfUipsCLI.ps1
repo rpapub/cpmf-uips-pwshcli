@@ -23,7 +23,7 @@ function Invoke-CpmfUipsCLI {
     .PARAMETER Command
         The subcommand to execute. Tab-completable. Optional when using -Version.
 
-    .PARAMETER Version
+    .PARAMETER ShowVersion
         Print the wrapper and dependency versions and exit without dispatching a subcommand.
 
     .PARAMETER ProjectJson
@@ -31,6 +31,10 @@ function Invoke-CpmfUipsCLI {
 
     .PARAMETER FeedPath
         NuGet feed path. Forwarded to pack. Defaults to the repo config / env var layer if set.
+
+    .PARAMETER ProjectVersion
+        Explicit version string written to project.json before packing. Forwarded to pack.
+        Use in CI pipelines that derive the version from a git tag (e.g. GITHUB_REF_NAME).
 
     .PARAMETER OutputPath
         Base directory for native uipcli pack output. Forwarded to pack. The shared
@@ -101,10 +105,11 @@ function Invoke-CpmfUipsCLI {
         [Parameter(Position = 0)]
         [ValidateSet('pack', 'analyze', 'install-tool', 'uninstall-tool', 'install-uipathcli', 'uninstall-uipathcli', 'install-config', 'uninstall-config', 'install-hook', 'diagnose')]
         [string] $Command,
-        [switch] $Version,
+        [switch] $ShowVersion,
 
         # --- shared / pack / analyze ---
         [string]   $ProjectJson,
+        [string]   $ProjectVersion,
         [string]   $FeedPath,
         [string]   $OutputPath,
         [string[]] $Targets,
@@ -129,7 +134,7 @@ function Invoke-CpmfUipsCLI {
         [switch]   $Force
     )
 
-    if ($Version) {
+    if ($ShowVersion) {
         $cliVersion = (Get-Module CpmfUipsCLI).Version
         $packVersion = (Get-Module CpmfUipsPack).Version
         Write-Output "CpmfUipsCLI $cliVersion (CpmfUipsPack $packVersion)"
@@ -137,7 +142,7 @@ function Invoke-CpmfUipsCLI {
     }
 
     if ([string]::IsNullOrWhiteSpace($Command)) {
-        throw "Command is required unless -Version is specified."
+        throw "Command is required unless -ShowVersion is specified."
     }
 
     $cfg = Get-CpmfUipsCLIEffectiveConfig
@@ -178,7 +183,7 @@ function Invoke-CpmfUipsCLI {
         }
 
         'analyze' {
-            $remove = @('FeedPath', 'OutputPath', 'UseWorktree', 'WorktreeSibling', 'MultiTfm', 'Force')
+            $remove = @('FeedPath', 'OutputPath', 'UseWorktree', 'WorktreeSibling', 'MultiTfm', 'ProjectVersion', 'Force')
             foreach ($k in $remove) { $forwardParams.Remove($k) | Out-Null }
             Write-Verbose "[CpmfUipsCLI] → Invoke-CpmfUipsAnalyze"
             $projectName = if ($ProjectJson) { Split-Path (Split-Path $ProjectJson -Parent) -Leaf } else { '(unknown)' }
