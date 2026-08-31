@@ -56,8 +56,11 @@ Invoke-CpmfUipsCLI diagnose
 | Subcommand | Dispatches to | Purpose |
 |---|---|---|
 | `pack` | `Invoke-CpmfUipsPack` | Bump, pack, stage `.nupkg` |
+| `analyze` | `Invoke-CpmfUipsAnalyze` | Run the Workflow Analyzer against a project |
 | `install-tool` | `Install-CpmfUipsPackCommandLineTool` | Download uipcli and .NET runtime into user profile |
 | `uninstall-tool` | `Uninstall-CpmfUipsPackCommandLineTool` | Remove uipcli and runtime |
+| `install-uipathcli` | `Install-UipathcliTool` | Download the uipathcli Go binary |
+| `uninstall-uipathcli` | `Uninstall-UipathcliTool` | Remove the uipathcli Go binary |
 | `install-config` | `Install-CpmfUipsPackConfig` | Scaffold user-level config file |
 | `uninstall-config` | `Uninstall-CpmfUipsPackConfig` | Remove user-level config file |
 | `install-hook` | `Install-CpmfUipsPackGitHook` | Install git pre-push hook |
@@ -91,6 +94,39 @@ Invoke-CpmfUipsCLI install-tool -CliVersionNet8 '25.10.11'
 # Install git pre-push hook
 Invoke-CpmfUipsCLI install-hook -ProjectJson 'C:\repos\MyProject\project.json'
 ```
+
+---
+
+## Pack backends
+
+`-Backend` chooses the tool that performs the pack: `uipcli` (default), `uipathcli`, or
+`workflowcompiler`.
+
+`workflowcompiler` invokes `UiPath.WorkflowCompiler` directly — the engine the other two
+drive internally. It exists because the compiler's `--include-sources` defaults to **true**
+and `uipcli package pack` exposes no flag for it, so packages packed through `uipcli` ship
+their full `.cs` source in plaintext under `content/`. This backend defaults it to `false`
+and can also override the package id without editing `project.json`.
+
+```powershell
+Invoke-CpmfUipsCLI pack -ProjectJson '...\project.json' -Targets net8 `
+    -Backend workflowcompiler `
+    -PublisherProps 'D:\schemas\publisher.props' `
+    -PackageId 'MyBrand.MyLib'
+
+# Ship sources deliberately
+Invoke-CpmfUipsCLI pack -ProjectJson '...' -Backend workflowcompiler -IncludeSources
+```
+
+`-PublisherProps` reads shared package identity (author, tags, project URL, repository
+type) and pack policy from an MSBuild-style `.props` file, plus the compiler location via
+`PublisherPackWorkflowCompilerPath`. Individual fields can also be passed directly:
+`-PackageId`, `-PackageAuthor`, `-PackageDescription`, `-PackageTags`, `-IconUrl`,
+`-ProjectUrl`, `-ReleaseNotes`, `-RepositoryType`, `-RepositoryUrl`, `-RepositoryBranch`,
+`-RepositoryCommit`. Repository fields default to the project's git checkout.
+
+The backend is net8-only: `-MultiTfm` and `-Targets net6` are rejected, and `analyze` is
+not supported for it.
 
 ---
 

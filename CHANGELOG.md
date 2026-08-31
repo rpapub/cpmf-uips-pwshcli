@@ -7,6 +7,36 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.0] — 2026-08-31
+
+### Added
+
+- **`-Backend workflowcompiler`** — forwards to the new CpmfUipsPack backend that invokes
+  `UiPath.WorkflowCompiler` directly. It is the only backend that can keep project sources
+  out of the produced package: the compiler defaults `--include-sources` to `true` and
+  `uipcli package pack` has no flag for it, so packages packed through `uipcli` ship their
+  full `.cs` source in plaintext under `content/`. net8 only; not supported for `analyze`.
+
+- **Publisher identity parameters** forwarded to `pack`: `-PublisherProps`, `-PackageId`,
+  `-PackageAuthor`, `-PackageDescription`, `-PackageTags`, `-IconUrl`, `-ProjectUrl`,
+  `-ReleaseNotes`, `-RepositoryType`, `-RepositoryUrl`, `-RepositoryBranch`,
+  `-RepositoryCommit`, `-IncludeSources`, `-WorkflowCompilerPath`, `-DotnetPath`.
+  All are stripped before dispatching `analyze`.
+
+- **`UIPS_BACKEND` and `UIPS_PUBLISHERPROPS`** environment variables, plus matching config
+  file keys, following the existing precedence model.
+
+### Changed
+
+- Requires `CpmfUipsPack >= 0.4.0`.
+
+### Fixed
+
+- Subcommand table in the README listed only 7 of the 10 subcommands — `analyze`,
+  `install-uipathcli` and `uninstall-uipathcli` were missing.
+
+---
+
 ## [0.3.1] — 2026-05-14
 
 ### Changed

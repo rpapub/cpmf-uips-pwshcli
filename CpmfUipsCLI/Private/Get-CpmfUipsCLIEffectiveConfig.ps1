@@ -26,6 +26,8 @@ function Get-CpmfUipsCLIEffectiveConfig {
         UIPS_WORKTREE_BASE         → WorktreeBase
         UIPS_USE_WORKTREE          → UseWorktree
         UIPS_NO_BUMP               → NoBump
+        UIPS_BACKEND               → Backend ('uipcli' | 'uipathcli' | 'workflowcompiler')
+        UIPS_PUBLISHERPROPS        → PublisherProps (path to a publisher .props file)
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -76,6 +78,8 @@ function Get-CpmfUipsCLIEffectiveConfig {
         'UIPS_WORKTREE_BASE'         = 'WorktreeBase'
         'UIPS_USE_WORKTREE'          = 'UseWorktree'
         'UIPS_NO_BUMP'               = 'NoBump'
+        'UIPS_BACKEND'               = 'Backend'
+        'UIPS_PUBLISHERPROPS'        = 'PublisherProps'
     }
 
     foreach ($envKey in $envMap.Keys) {

@@ -50,8 +50,11 @@ Import-Module ./CpmfUipsCLI/CpmfUipsCLI.psd1 -Force
 | Subcommand       | CpmfUipsPack function                      |
 |------------------|--------------------------------------------|
 | `pack`           | `Invoke-CpmfUipsPack`                      |
+| `analyze`        | `Invoke-CpmfUipsAnalyze`                   |
 | `install-tool`   | `Install-CpmfUipsPackCommandLineTool`      |
 | `uninstall-tool` | `Uninstall-CpmfUipsPackCommandLineTool`    |
+| `install-uipathcli`| `Install-UipathcliTool`                  |
+| `uninstall-uipathcli`| `Uninstall-UipathcliTool`              |
 | `install-config` | `Install-CpmfUipsPackConfig`               |
 | `uninstall-config`| `Uninstall-CpmfUipsPackConfig`            |
 | `install-hook`   | `Install-CpmfUipsPackGitHook`              |

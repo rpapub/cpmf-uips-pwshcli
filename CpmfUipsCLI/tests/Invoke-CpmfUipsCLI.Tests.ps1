@@ -176,9 +176,84 @@ Describe 'Invoke-CpmfUipsCLI — dispatch' {
         }
     }
 
+    Context 'workflowcompiler backend pass-through' {
+        It 'accepts -Backend workflowcompiler and forwards it' {
+            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack { return @() }
+
+            Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json' -Backend workflowcompiler
+
+            Should -Invoke Invoke-CpmfUipsPack -ModuleName CpmfUipsCLI -Times 1 `
+                -ParameterFilter { $Backend -eq 'workflowcompiler' }
+        }
+
+        It 'forwards the publisher identity parameters verbatim' {
+            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack { return @() }
+
+            Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json' `
+                -Backend workflowcompiler `
+                -PublisherProps 'D:\schemas\publisher.props' `
+                -PackageId 'MyBrand.MyLib' `
+                -PackageAuthor 'Jane Doe' `
+                -PackageTags 'a b' `
+                -RepositoryCommit 'abc1234'
+
+            Should -Invoke Invoke-CpmfUipsPack -ModuleName CpmfUipsCLI -Times 1 -ParameterFilter {
+                $PublisherProps   -eq 'D:\schemas\publisher.props' -and
+                $PackageId        -eq 'MyBrand.MyLib' -and
+                $PackageAuthor    -eq 'Jane Doe' -and
+                $PackageTags      -eq 'a b' -and
+                $RepositoryCommit -eq 'abc1234'
+            }
+        }
+
+        It 'forwards -IncludeSources as a switch' {
+            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack { return @() }
+
+            Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json' -IncludeSources
+
+            Should -Invoke Invoke-CpmfUipsPack -ModuleName CpmfUipsCLI -Times 1 `
+                -ParameterFilter { $IncludeSources -eq $true }
+        }
+
+        It 'takes -PublisherProps from UIPS_PUBLISHERPROPS when not passed explicitly' {
+            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsPack { return @() }
+            $env:UIPS_PUBLISHERPROPS = 'D:\schemas\from-env.props'
+            try {
+                Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json'
+
+                Should -Invoke Invoke-CpmfUipsPack -ModuleName CpmfUipsCLI -Times 1 `
+                    -ParameterFilter { $PublisherProps -eq 'D:\schemas\from-env.props' }
+            } finally {
+                Remove-Item Env:\UIPS_PUBLISHERPROPS -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'does not leak pack-only identity parameters into analyze' {
+            Mock -ModuleName CpmfUipsCLI Invoke-CpmfUipsAnalyze {
+                if ($PSBoundParameters.ContainsKey('PackageId') -or
+                    $PSBoundParameters.ContainsKey('PublisherProps') -or
+                    $PSBoundParameters.ContainsKey('IncludeSources')) {
+                    throw 'pack-only parameters must not reach Invoke-CpmfUipsAnalyze'
+                }
+                return @()
+            }
+
+            { Invoke-CpmfUipsCLI analyze -ProjectJson 'C:\repos\MyBot\project.json' `
+                -PublisherProps 'D:\schemas\publisher.props' -PackageId 'X' -IncludeSources } |
+                Should -Not -Throw
+
+            Should -Invoke Invoke-CpmfUipsAnalyze -ModuleName CpmfUipsCLI -Times 1
+        }
+    }
+
     Context 'parameter validation' {
         It 'rejects unknown subcommand' {
             { Invoke-CpmfUipsCLI 'explode' } | Should -Throw
+        }
+
+        It 'rejects an unknown backend' {
+            { Invoke-CpmfUipsCLI pack -ProjectJson 'C:\repos\MyBot\project.json' -Backend 'nope' } |
+                Should -Throw
         }
     }
 }

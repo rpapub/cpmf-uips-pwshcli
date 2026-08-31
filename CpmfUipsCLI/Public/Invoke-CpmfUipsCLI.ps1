@@ -61,6 +61,61 @@ function Invoke-CpmfUipsCLI {
     .PARAMETER MultiTfm
         Merge net6/net8 TFM outputs into a single nupkg. Forwarded to pack.
 
+    .PARAMETER Backend
+        Pack backend: 'uipcli' (default), 'uipathcli', or 'workflowcompiler'.
+        Forwarded to pack and analyze.
+
+        'workflowcompiler' invokes UiPath.WorkflowCompiler directly. It is the only
+        backend that can keep project sources out of the package (uipcli hardcodes
+        --include-sources true) and the only one that can override the package id.
+        net8 only; analyze is not supported for it.
+
+    .PARAMETER PublisherProps
+        Path to a publisher .props file supplying shared package identity and pack
+        policy. Forwarded to pack. Explicit parameters win over the props file.
+
+    .PARAMETER PackageId
+        Package id written to the nuspec, overriding project.json's "name". Forwarded to pack.
+
+    .PARAMETER PackageAuthor
+        Package author. Forwarded to pack. Defaults to PublisherAuthors from the props file.
+
+    .PARAMETER PackageDescription
+        Package description. Forwarded to pack.
+
+    .PARAMETER PackageTags
+        Space-separated package tags. Forwarded to pack.
+
+    .PARAMETER IconUrl
+        Package icon URL. Forwarded to pack.
+
+    .PARAMETER ProjectUrl
+        Package project URL. Forwarded to pack.
+
+    .PARAMETER ReleaseNotes
+        Package release notes. Forwarded to pack.
+
+    .PARAMETER RepositoryType
+        Repository type stamped into the package. Forwarded to pack.
+
+    .PARAMETER RepositoryUrl
+        Repository URL. Derived from git when omitted. Forwarded to pack.
+
+    .PARAMETER RepositoryBranch
+        Repository branch. Derived from git when omitted. Forwarded to pack.
+
+    .PARAMETER RepositoryCommit
+        Repository commit. Derived from git when omitted. Forwarded to pack.
+
+    .PARAMETER IncludeSources
+        Ship project sources inside the package. Default false. Forwarded to pack.
+
+    .PARAMETER WorkflowCompilerPath
+        Path to UiPath.WorkflowCompiler.dll or .exe. Forwarded to pack.
+
+    .PARAMETER DotnetPath
+        Dotnet host for a .dll compiler. Forwarded to pack.
+
     .PARAMETER ConfigFile
         Per-project config file (.psd1). Forwarded to pack.
 
@@ -89,6 +144,11 @@ function Invoke-CpmfUipsCLI {
         Invoke-CpmfUipsCLI pack -ProjectJson C:\repos\MyBot\project.json -Targets net6,net8 -WhatIf
 
     .EXAMPLE
+        Invoke-CpmfUipsCLI pack -ProjectJson C:\repos\MyLib\project.json -Targets net8 `
+            -Backend workflowcompiler -PublisherProps D:\schemas\publisher.props `
+            -PackageId MyBrand.MyLib
+
+    .EXAMPLE
         Invoke-CpmfUipsCLI install-tool
 
     .EXAMPLE
@@ -113,13 +173,30 @@ function Invoke-CpmfUipsCLI {
         [string]   $FeedPath,
         [string]   $OutputPath,
         [string[]] $Targets,
-        [ValidateSet('uipcli', 'uipathcli')]
+        [ValidateSet('uipcli', 'uipathcli', 'workflowcompiler')]
         [string]   $Backend,
         [switch]   $NoBump,
         [switch]   $UseWorktree,
         [switch]   $SkipInstall,
         [switch]   $MultiTfm,
         [string]   $ConfigFile,
+
+        # --- publisher identity / workflowcompiler backend (pack only) ---
+        [string]   $PublisherProps,
+        [string]   $PackageId,
+        [string]   $PackageAuthor,
+        [string]   $PackageDescription,
+        [string]   $PackageTags,
+        [string]   $IconUrl,
+        [string]   $ProjectUrl,
+        [string]   $ReleaseNotes,
+        [string]   $RepositoryType,
+        [string]   $RepositoryUrl,
+        [string]   $RepositoryBranch,
+        [string]   $RepositoryCommit,
+        [switch]   $IncludeSources,
+        [string]   $WorkflowCompilerPath,
+        [string]   $DotnetPath,
 
         # --- tool version ---
         [string]   $CliVersion,        # deprecated passthrough
@@ -146,11 +223,14 @@ function Invoke-CpmfUipsCLI {
     }
 
     $cfg = Get-CpmfUipsCLIEffectiveConfig
-    foreach ($key in @('FeedPath', 'OutputPath', 'Targets', 'NoBump', 'SkipInstall', 'UseWorktree', 'WorktreeBase', 'WorktreeSibling', 'MultiTfm', 'Backend', 'CliVersionNet6', 'CliVersionNet8', 'UipcliPathNet6', 'UipcliPathNet8', 'ToolBasePath')) {
+    foreach ($key in @('FeedPath', 'OutputPath', 'Targets', 'NoBump', 'SkipInstall', 'UseWorktree', 'WorktreeBase', 'WorktreeSibling', 'MultiTfm', 'Backend', 'CliVersionNet6', 'CliVersionNet8', 'UipcliPathNet6', 'UipcliPathNet8', 'ToolBasePath',
+                       'PublisherProps', 'PackageId', 'PackageAuthor', 'PackageDescription', 'PackageTags',
+                       'IconUrl', 'ProjectUrl', 'ReleaseNotes', 'RepositoryType', 'RepositoryUrl',
+                       'RepositoryBranch', 'RepositoryCommit', 'IncludeSources', 'WorkflowCompilerPath', 'DotnetPath')) {
         if (-not $PSBoundParameters.ContainsKey($key) -and $cfg.ContainsKey($key)) {
             if ($key -in @('Targets')) {
                 $value = [string[]]$cfg[$key]
-            } elseif ($key -in @('NoBump', 'SkipInstall', 'UseWorktree', 'MultiTfm')) {
+            } elseif ($key -in @('NoBump', 'SkipInstall', 'UseWorktree', 'MultiTfm', 'IncludeSources')) {
                 $value = [bool]$cfg[$key]
             } else {
                 $value = $cfg[$key]
@@ -183,7 +263,10 @@ function Invoke-CpmfUipsCLI {
         }
 
         'analyze' {
-            $remove = @('FeedPath', 'OutputPath', 'UseWorktree', 'WorktreeSibling', 'MultiTfm', 'ProjectVersion', 'Force')
+            $remove = @('FeedPath', 'OutputPath', 'UseWorktree', 'WorktreeSibling', 'MultiTfm', 'ProjectVersion', 'Force',
+                        'PublisherProps', 'PackageId', 'PackageAuthor', 'PackageDescription', 'PackageTags',
+                        'IconUrl', 'ProjectUrl', 'ReleaseNotes', 'RepositoryType', 'RepositoryUrl',
+                        'RepositoryBranch', 'RepositoryCommit', 'IncludeSources', 'WorkflowCompilerPath', 'DotnetPath')
             foreach ($k in $remove) { $forwardParams.Remove($k) | Out-Null }
             Write-Verbose "[CpmfUipsCLI] → Invoke-CpmfUipsAnalyze"
             $projectName = if ($ProjectJson) { Split-Path (Split-Path $ProjectJson -Parent) -Leaf } else { '(unknown)' }

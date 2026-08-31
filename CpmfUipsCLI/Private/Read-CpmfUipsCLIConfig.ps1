@@ -29,6 +29,10 @@ function Read-CpmfUipsCLIConfig {
         'UseWorktree', 'WorktreeBase', 'WorktreeSibling',
         'CliVersionNet6', 'CliVersionNet8', 'UipcliPathNet6', 'UipcliPathNet8',
         'Targets', 'MultiTfm', 'ToolBase', 'ToolBasePath', 'Backend',
+        'PublisherProps', 'PackageId', 'PackageAuthor', 'PackageDescription', 'PackageTags',
+        'IconUrl', 'ProjectUrl', 'ReleaseNotes',
+        'RepositoryType', 'RepositoryUrl', 'RepositoryBranch', 'RepositoryCommit',
+        'IncludeSources', 'WorkflowCompilerPath', 'DotnetPath',
         'CliVersion'   # deprecated — still forwarded for compatibility
     )
 
