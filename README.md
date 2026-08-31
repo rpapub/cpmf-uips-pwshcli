@@ -99,8 +99,8 @@ Invoke-CpmfUipsCLI install-hook -ProjectJson 'C:\repos\MyProject\project.json'
 
 ## Pack backends
 
-`-Backend` chooses the tool that performs the pack: `uipcli` (default), `uipathcli`, or
-`workflowcompiler`.
+`-Backend` chooses the tool that performs the pack: `workflowcompiler` (default), `uipcli`,
+or `uipathcli`. `-Targets` defaults to `net8`.
 
 `workflowcompiler` invokes `UiPath.WorkflowCompiler` directly — the engine the other two
 drive internally. It exists because the compiler's `--include-sources` defaults to **true**
@@ -126,7 +126,9 @@ type) and pack policy from an MSBuild-style `.props` file, plus the compiler loc
 `-RepositoryCommit`. Repository fields default to the project's git checkout.
 
 The backend is net8-only: `-MultiTfm` and `-Targets net6` are rejected, and `analyze` is
-not supported for it.
+not supported for it. Use `-Backend uipcli -Targets net6` for a net6 build, or
+`-Backend uipcli -Targets net6,net8 -MultiTfm` to merge both TFMs — those backends always
+pack sources and ignore the identity parameters, and warn when you supply them.
 
 ---
 

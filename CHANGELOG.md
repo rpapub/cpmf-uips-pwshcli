@@ -7,6 +7,22 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.5.0] — 2026-08-31
+
+### Changed — breaking
+
+- Tracks CpmfUipsPack 0.5.0, where **`-Backend` defaults to `workflowcompiler`** and
+  **`-Targets` defaults to `net8`**. `Invoke-CpmfUipsCLI pack` with neither parameter no
+  longer ships project sources in the package and no longer builds through the net6-era
+  23.x CLI. For the previous behaviour: `-Backend uipcli -Targets net6`.
+
+- The repo-level `cpmf-uips.psd1` no longer pins `Backend` or `Targets`, which would have
+  overridden the new defaults.
+
+- Requires `CpmfUipsPack >= 0.5.0`.
+
+---
+
 ## [0.4.0] — 2026-08-31
 
 ### Added
